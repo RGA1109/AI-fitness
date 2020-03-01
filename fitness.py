@@ -1,33 +1,32 @@
 import random
 
+def score_cal(fitness):
+    holder = fitness.split('.')
 
-def score_cal(fitness):    
-    total_fitness = 0
-    
-    # For each course that is taught by an instructor who can teach it, other than Staff: +3
-    total_fitness += (12 - fitness.count('STAFF'))*3
-    
-    # For each course taught by Staff: +1
-    total_fitness += fitness.count('STAFF')
-
-    # For each course that is the only course scheduled in that room at that time: +5
     x = 0
     indexing = 1
     room_indexing = 2
-    holder = fitness.split('.')
+    total_fitness = 0
 
-    # holder each room that is not twice the enrollment size
     room_counter = []
+    quad = ['Haag', 'Royall', 'Flarsheim']
+
     
+    # For each course that is taught by an instructor who can teach it, other than Staff: +3
+    total_fitness += (12 - fitness.count('S.')) * 3
+    
+    # For each course taught by Staff: +1
+    total_fitness += fitness.count('S.')
+
+
     while x != 12:
-        
-        # if (holder[room_indexing]+holder[room_indexing+1]) not in room_counter:
-        # room_counter.append(holder[room_indexing]+ holder[room_indexing])
-            
+        # For each course that is the only course scheduled in that room at that time: +5
+        if 
         # For each course that is in a room large enough to accommodate it: +5
         if int(holder[indexing]) < int(holder[indexing + 4]):
             total_fitness += 5
 
+        # holder each room that is not twice the enrollment size: +2
         if int(holder[indexing]) <= int(holder[indexing + 4])/2:
             total_fitness += 0
             
@@ -51,7 +50,6 @@ def score_cal(fitness):
           
     # CS 101 and CS 191 are usually taken the same semester; the same applies to CS 201 and CS 291. Therefore apply
     # these rules to those pairs of courses:
-    holder = fitness.split('.')
     time101a = holder[holder.index('CS101A')+3][:-1]
     time101a_location = holder[holder.index('CS101A') + 4]
                       
@@ -75,8 +73,6 @@ def score_cal(fitness):
 
     time291b = holder[holder.index('CS291B') + 3][:-1]
     time291b_location = holder[holder.index('CS291B') + 4]
-
-    quad = ['Haag', 'Royall', 'Flarsheim']
 
     times = [time101a, time101b, time191a, time191b, time201a, time201b, time291a, time291b]
     locations = [time101a_location, time101b_location, time191a_location, time191b_location, time201a_location,
@@ -129,9 +125,14 @@ def score_cal(fitness):
 
 # Instructors and what they can teach:
 def fitness():
+    # holder for the final scheduel
     fitness_string = ''
+
+    # list of all the classes avaliable
     classes = ['CS101A.', 'CS101B.', 'CS191A.', 'CS191B.', 'CS201A.', 'CS201B.', 'CS291A.', 'CS291B.', 'CS303.',
                'CS341.', 'CS449.', 'CS461.']
+
+    # for the length of avaliable classes create a scheduel
     for x in classes:
         fitness_string += x
 
@@ -141,6 +142,7 @@ def fitness():
         else:
             fitness_string += classes_hold[classes_hold.find(x) + 6: classes_hold.find(x) + 9]
 
+        # dictonary of teachers and the classes that they can teach
         teachers = [
             {'CS101A.': ['H.', 'B.', 'S.']},
             {'CS101B.': ['H.', 'B.', 'S.']},
@@ -155,32 +157,45 @@ def fitness():
             {'CS449.': ['H.', 'B.', 'S.']},
             {'CS461.': ['H.', 'R.', 'S.']}
             ]
-
+        
         for y in teachers:
             if x in y:
                 random_teach = random.randint(0, len(y[x])-1)
                 fitness_string += y[x][random_teach]
 
+        # list of available times
         time_slots = ['10A.', '11A.', '12P.', '1P.', '2P.', '3P.', '4P.']
+        
+        # variable to hold the randomly selected time slot index
         random_time_slot = random.randint(0, len(time_slots)-1)
 
+        # adds the time slot to the scheduel
         fitness_string += time_slots[random_time_slot]
 
+        # list of all avaiable rooms 
         rooms = ['Hagg301.', 'Hagg206.', 'Royall204.', 'Katz209.', 'Flarsheim310.', 'Flarsheim260.', 'Bloch0009.']
+
+        # variable to hold the ranomly selected room choice index
         random_room = random.randint(0, len(rooms)-1)
 
+        # adds the ranomly seclected room to the scheduel
         fitness_string += rooms[random_room]
-         
+
+        # a string of the rooms and the max amount of students in that room
         class_max = 'Hagg301.70.Hagg206.30.Royall204.70.Katz209.50.Flarsheim310.80.Flarsheim260.25.Bloch0009.30.'
 
+        # holder for the index point in the string class_max so we can locate the amount of students in the room
         starting_point = class_max.index(rooms[random_room])
 
+        # adds the number of students to the room that was prior select to the scheduel
         fitness_string += class_max[starting_point + len(rooms[random_room]):starting_point+len(rooms[random_room])+3]
-    
+
+    # returns the final scheduel
     return fitness_string
 
 
 def random_switch(fitness):
+    # this function takes a scheduel that has been created and randomly switches one part of it and returns the new shceduel
     classes = ['CS101A.', 'CS101B.', 'CS191A.', 'CS191B.', 'CS201A.', 'CS201B.', 'CS291A.', 'CS291B.', 'CS303.',
                'CS341.', 'CS449.', 'CS461.']
     switch = random.randint(0, len(classes)-1)
@@ -259,24 +274,28 @@ def random_switch(fitness):
     
 
 fitness = fitness()
-e1 = score_cal(fitness)
+
+engery1 = score_cal(fitness)
+energy2 = None
+
 attempts = 0
 changes = 0
-e2 = None
+
 T = 100
-temp = 0.5
+temp = 0.9
+
 while attempts <= 4000 or changes <= 400:
     best_score = 0
     new_fitness = random_switch(fitness)
-    e2 = score_cal(new_fitness)
-    total_energy = e2 - e1
+    energy2 = score_cal(new_fitness)
+    total_energy = energy2 - engery1
     
     if total_energy > 0:
-        e1 = e2
+        engery1 = energy2
         changes += 1
 
-    elif ((e2-e1)/T) < temp:
-        e1 = e2
+    elif (total_energy/T) >= temp:
+        engery1 = energy2
         changes += 1
         
     if changes == 400:
@@ -286,10 +305,10 @@ while attempts <= 4000 or changes <= 400:
             
     attempts += 1
     
-    if attempts == 4000 and changes == 0:
+    if (attempts == 4000 and changes == 0) or attempts == 4000:
         input('here')
         break
 
-##    print('current_attempts:', attempts, '  ', 'current_chcanges:', changes)
-##    print('current_Temp:', (e2-e1)/T)
-##    print('e2=', e2, '', 'e1=', e1)
+    print('current_attempts:', attempts, '  ', 'current_chcanges:', changes)
+    print('current_Temp:', (energy2-engery1)/T)
+    print('e2=', energy2, '', 'e1=', engery1)
